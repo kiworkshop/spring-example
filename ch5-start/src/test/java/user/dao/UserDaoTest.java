@@ -23,12 +23,18 @@ import javax.sql.DataSource;
 class UserDaoTest {
     private UserDao userDao;
     private DataSource dataSource;
+    private User user1;
+    private User user2;
+    private User user3;
 
     @BeforeEach
     void setUp() {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
         dataSource = applicationContext.getBean("dataSource", DataSource.class);
+        user1 = new User("deocks", "덕수", "deocksword");
+        user2 = new User("jj", "재주", "jassword");
+        user3 = new User("ki", "광일", "jassword");
     }
 
     @AfterEach
@@ -39,8 +45,6 @@ class UserDaoTest {
     @Test
     @DisplayName("새로운 User를 추가한다.")
     void add() throws SQLException {
-        User user1 = new User("deocks", "덕수", "deocksword");
-        User user2 = new User("jj", "재주", "jassword");
 
         userDao.add(user1);
         userDao.add(user2);
@@ -70,26 +74,16 @@ class UserDaoTest {
     void count() throws SQLException {
         userDao.deleteAll();
         assertThat(userDao.getCount()).isEqualTo(0);
-
-        User user1 = new User("deocks", "덕수", "deocksword");
         userDao.add(user1);
         assertThat(userDao.getCount()).isEqualTo(1);
-
-        User user2 = new User("jj", "재주", "jassword");
         userDao.add(user2);
         assertThat(userDao.getCount()).isEqualTo(2);
-
-        User user3 = new User("ki", "광일", "jassword");
         userDao.add(user3);
         assertThat(userDao.getCount()).isEqualTo(3);
     }
 
     @Test
     public void getAll()  {
-        User user1 = new User("deocks", "덕수", "deocksword");
-        User user2 = new User("jj", "재주", "jassword");
-        User user3 = new User("ki", "광일", "jassword");
-
         userDao.deleteAll();
         List<User> users = userDao.getAll();
         assertThat(users).size().isEqualTo(0);
@@ -120,20 +114,18 @@ class UserDaoTest {
     @Test
     @DisplayName("같은 id의 사용자를 등록하면 예외 발생")
     void duplicateKey() {
-        User user = new User("jj", "재주", "jassword");
-        userDao.add(user);
+        userDao.add(user1);
 
-        assertThatThrownBy(() -> userDao.add(user))
+        assertThatThrownBy(() -> userDao.add(user1))
             .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
     @DisplayName("SQLException 전환 기능의 학습 테스트")
     void sqlExceptionTranslate() {
-        User user = new User("jj", "재주", "jassword");
         try {
-            userDao.add(user);
-            userDao.add(user);
+            userDao.add(user1);
+            userDao.add(user1);
         } catch (DuplicateKeyException exception) {
             SQLException sqlException = (SQLException)exception.getRootCause();
             SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
