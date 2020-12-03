@@ -10,6 +10,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
+import user.domain.Level;
 import user.domain.User;
 
 import java.sql.SQLException;
@@ -32,9 +33,9 @@ class UserDaoTest {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
         dataSource = applicationContext.getBean("dataSource", DataSource.class);
-        user1 = new User("deocks", "덕수", "deocksword");
-        user2 = new User("jj", "재주", "jassword");
-        user3 = new User("ki", "광일", "jassword");
+        user1 = new User("deocks", "덕수", "deocksword", Level.BASIC, 1, 0);
+        user2 = new User("jj", "재주", "jassword", Level.SILVER, 55, 10);
+        user3 = new User("ki", "광일", "jassword", Level.GOLD, 100, 40);
     }
 
     @AfterEach
@@ -139,5 +140,8 @@ class UserDaoTest {
         assertThat(user1.getId()).isEqualTo(user2.getId());
         assertThat(user1.getName()).isEqualTo(user2.getName());
         assertThat(user1.getPassword()).isEqualTo(user2.getPassword());
+        assertThat(user1.getLevel()).isEqualTo(user2.getLevel());
+        assertThat(user1.getLogin()).isEqualTo(user2.getLogin());
+        assertThat(user1.getRecommend()).isEqualTo(user2.getRecommend());
     }
 }

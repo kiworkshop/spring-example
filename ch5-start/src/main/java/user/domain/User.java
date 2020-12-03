@@ -6,16 +6,22 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User {
-	String id;
-	String name;
-	String password;
-	
-	public User() {
-	}
-	
-	public User(String id, String name, String password) {
-		this.id = id;
-		this.name = name;
-		this.password = password;
-	}
+    String id;
+    String name;
+    String password;
+    Level level;
+    int login;
+    int recommend;
+
+    public User() {
+    }
+
+    public User(String id, String name, String password, Level level, int login, int recommend) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.level = level;
+        this.login = login;
+        this.recommend = recommend;
+    }
 }
