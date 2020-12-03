@@ -67,7 +67,7 @@ class UserDaoTest {
         assertThat(userDao.getCount()).isEqualTo(0);
 
         assertThatThrownBy(() -> userDao.get("unknwon_id"))
-            .isInstanceOf(EmptyResultDataAccessException.class);
+                .isInstanceOf(EmptyResultDataAccessException.class);
     }
 
     @Test
@@ -84,7 +84,7 @@ class UserDaoTest {
     }
 
     @Test
-    public void getAll()  {
+    public void getAll() {
         userDao.deleteAll();
         List<User> users = userDao.getAll();
         assertThat(users).size().isEqualTo(0);
@@ -113,12 +113,32 @@ class UserDaoTest {
     }
 
     @Test
+    public void update() {
+        userDao.deleteAll();
+
+        userDao.add(user1);
+        userDao.add(user2);
+
+        user1.setName("이성훈");
+        user1.setPassword("seongsword");
+        user1.setLevel(Level.GOLD);
+        user1.setLogin(1000);
+        user1.setRecommend(999);
+        userDao.update(user1);
+
+        User user1update = userDao.get(user1.getId());
+        checkSameUser(user1, user1update);
+        User user2same = userDao.get(user2.getId());
+        checkSameUser(user2, user2same);
+    }
+
+    @Test
     @DisplayName("같은 id의 사용자를 등록하면 예외 발생")
     void duplicateKey() {
         userDao.add(user1);
 
         assertThatThrownBy(() -> userDao.add(user1))
-            .isInstanceOf(DuplicateKeyException.class);
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
@@ -128,11 +148,11 @@ class UserDaoTest {
             userDao.add(user1);
             userDao.add(user1);
         } catch (DuplicateKeyException exception) {
-            SQLException sqlException = (SQLException)exception.getRootCause();
+            SQLException sqlException = (SQLException) exception.getRootCause();
             SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
 
             assertThat(set.translate(null, null, sqlException))
-                .isInstanceOf(DuplicateKeyException.class);
+                    .isInstanceOf(DuplicateKeyException.class);
         }
     }
 

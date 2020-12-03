@@ -52,6 +52,13 @@ public class UserDaoJdbc implements UserDao {
         jdbcTemplate.update(connection -> connection.prepareStatement("delete from users"));
     }
 
+    public void update(User user) {
+        this.jdbcTemplate.update(
+                "update users set name = ?, password = ?, level = ?, login = ?, "
+                        + "recommend = ? where id = ?", user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getId()
+        );
+    }
+
     public int getCount() {
         return this.jdbcTemplate.queryForInt("select count(*) from users");
     }
