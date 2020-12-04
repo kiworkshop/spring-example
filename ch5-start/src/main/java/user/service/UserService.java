@@ -1,15 +1,20 @@
 package user.service;
 
+import lombok.Setter;
 import user.dao.UserDao;
 import user.domain.Level;
 import user.domain.User;
 
 import java.util.List;
 
-public class UserService implements UserLevelUpgradePolicy{
+@Setter
+public class UserService implements UserLevelUpgradePolicy {
     public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
     public static final int MIN_RECOMMEND_FOR_GOLD = 30;
     private UserDao userDao;
+
+    public UserService() {
+    }
 
     public UserService(UserDao userDao) {
         this.userDao = userDao;
@@ -49,4 +54,5 @@ public class UserService implements UserLevelUpgradePolicy{
         }
         userDao.add(user);
     }
+
 }

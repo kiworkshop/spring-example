@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
 import static user.service.UserService.MIN_RECOMMEND_FOR_GOLD;
 
@@ -23,17 +24,34 @@ class UserServiceTest {
     private UserService userService;
     private List<User> users;
 
+    static class TestUserService extends UserService {
+        private String id;
+
+        private TestUserService(String id) {
+            this.id = id;
+        }
+
+        public void upgradeLevel(User user) {
+            if (user.getId().equals(this.id))
+                throw new TestUserServiceException();
+            super.upgradeLevel(user);
+        }
+    }
+
+    static class TestUserServiceException extends RuntimeException {
+    }
+
     @BeforeEach
     void setUp() {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
         userService = applicationContext.getBean("userService", UserService.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
         users = Arrays.asList(
-                new User("deocks", "덕수", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
-                new User("jj", "재주", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
-                new User("ki", "광일", "jassword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD - 1),
-                new User("harris", "성훈", "seongsword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
-                new User("jeongkyo", "정교", "jeongsword", Level.GOLD, 100, Integer.MAX_VALUE)
+                new User("1deocks", "덕수", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
+                new User("2jj", "재주", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
+                new User("3ki", "광일", "jassword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD - 1),
+                new User("4harris", "성훈", "seongsword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
+                new User("5jeongkyo", "정교", "jeongsword", Level.GOLD, 100, Integer.MAX_VALUE)
         );
     }
 
@@ -83,5 +101,24 @@ class UserServiceTest {
         } else {
             assertThat(userUpdate.getLevel()).isEqualTo(user.getLevel());
         }
+    }
+
+    @Test
+    void upgradeAllOrNothing() {
+        UserService testUserService = new TestUserService(users.get(3).getId());
+        testUserService.setUserDao(this.userDao);
+
+        userDao.deleteAll();
+        for (User user : users) {
+            userDao.add(user);
+        }
+
+        try {
+            testUserService.upgradeLevels();
+            fail("TestUserServiceException expected");
+        } catch (TestUserServiceException e) {
+            System.out.println(e);
+        }
+        checkLevelUpgraded(users.get(1), false);
     }
 }
