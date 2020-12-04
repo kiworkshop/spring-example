@@ -4,7 +4,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.transaction.PlatformTransactionManager;
+import user.service.DummyMailSender;
 import user.service.UserService;
 
 import javax.sql.DataSource;
@@ -32,11 +35,24 @@ public class DaoFactory {
     public UserService userService(){
         UserService userService = new UserService(userDao());
         userService.setTransactionManager(transactionManager());
+        userService.setMailSender(mailSender());
         return userService;
     }
 
     @Bean
     public PlatformTransactionManager transactionManager(){
         return new DataSourceTransactionManager(dataSource());
+    }
+
+//    @Bean
+//    public MailSender mailSender() {
+//        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+//        mailSender.setHost("mail.server.com");
+//        return mailSender;
+//    }
+
+    @Bean
+    public MailSender mailSender() {
+        return new DummyMailSender();
     }
 }
