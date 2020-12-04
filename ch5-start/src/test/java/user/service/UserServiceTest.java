@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import user.dao.DaoFactory;
 import user.dao.UserDao;
 import user.dao.UserDaoJdbc;
@@ -25,8 +27,7 @@ class UserServiceTest {
 
     private UserDao userDao;
     private UserService userService;
-    private DataSource dataSource;
-
+    private PlatformTransactionManager transactionManager;
     private List<User> users;
 
     static class TestUserService extends UserService {
@@ -51,7 +52,7 @@ class UserServiceTest {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
         userService = applicationContext.getBean("userService", UserService.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
-        dataSource = applicationContext.getBean("dataSource", DataSource.class);
+        transactionManager = applicationContext.getBean("transactionManager", DataSourceTransactionManager.class);
         users = Arrays.asList(
                 new User("1deocks", "덕수", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
                 new User("2jj", "재주", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
@@ -113,7 +114,7 @@ class UserServiceTest {
     void upgradeAllOrNothing() throws SQLException {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
-        testUserService.setDataSource(this.dataSource);
+        testUserService.setTransactionManager(transactionManager);
         userDao.deleteAll();
         for (User user : users) {
             userDao.add(user);

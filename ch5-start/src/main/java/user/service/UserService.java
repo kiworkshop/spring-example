@@ -2,6 +2,9 @@ package user.service;
 
 import lombok.Setter;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import user.dao.UserDao;
 import user.domain.Level;
@@ -17,7 +20,7 @@ public class UserService implements UserLevelUpgradePolicy {
     public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
     public static final int MIN_RECOMMEND_FOR_GOLD = 30;
     private UserDao userDao;
-    private DataSource dataSource;
+    private PlatformTransactionManager transactionManager;
 
     public UserService() {
     }
@@ -27,23 +30,18 @@ public class UserService implements UserLevelUpgradePolicy {
     }
 
     public void upgradeLevels() throws SQLException {
-        TransactionSynchronizationManager.initSynchronization();
-        Connection c = DataSourceUtils.getConnection(dataSource);
-        c.setAutoCommit(false);
+        TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+
         try {
             List<User> users = userDao.getAll();
             for (User user : users) {
                 if (canUpgradeLevel(user))
                     upgradeLevel(user);
             }
-            c.commit();
+            this.transactionManager.commit(status);
         } catch (Exception e) {
-            c.rollback();
+            this.transactionManager.rollback(status);
             throw e;
-        } finally {
-            DataSourceUtils.releaseConnection(c, dataSource);
-            TransactionSynchronizationManager.unbindResource(this.dataSource);
-            TransactionSynchronizationManager.clearSynchronization();
         }
     }
 
