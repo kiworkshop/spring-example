@@ -28,6 +28,8 @@ public class DaoFactory {
 
     @Bean
     public UserService userService(){
-        return new UserService(userDao());
+        UserService userService = new UserService(userDao());
+        userService.setDataSource(dataSource());
+        return userService;
     }
 }
