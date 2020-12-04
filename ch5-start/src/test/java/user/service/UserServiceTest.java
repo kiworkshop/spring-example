@@ -54,11 +54,11 @@ class UserServiceTest {
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
         transactionManager = applicationContext.getBean("transactionManager", DataSourceTransactionManager.class);
         users = Arrays.asList(
-                new User("1deocks", "덕수", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
-                new User("2jj", "재주", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
-                new User("3ki", "광일", "jassword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD - 1),
-                new User("4harris", "성훈", "seongsword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
-                new User("5jeongkyo", "정교", "jeongsword", Level.GOLD, 100, Integer.MAX_VALUE)
+                new User("1deocks", "덕수", "ds@kiworshop.com", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
+                new User("2jj", "재주", "jj@kiworshop.com", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
+                new User("3ki", "광일", "ki@kiworshop.com", "jassword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD - 1),
+                new User("4harris", "성훈", "sh@kiworshop.com", "seongsword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
+                new User("5jeongkyo", "정교", "jk@kiworshop.com", "jeongsword", Level.GOLD, 100, Integer.MAX_VALUE)
         );
     }
 
