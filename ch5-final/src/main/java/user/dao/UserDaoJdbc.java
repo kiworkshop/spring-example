@@ -8,15 +8,21 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import user.domain.Level;
 import user.domain.User;
 
 public class UserDaoJdbc implements UserDao {
     private final JdbcTemplate jdbcTemplate;
+
     private final RowMapper<User> userMapper = (rs, rowNum) -> {
         User user = new User();
         user.setId(rs.getString("id"));
         user.setName(rs.getString("name"));
+        user.setEmail(rs.getString("email"));
         user.setPassword(rs.getString("password"));
+        user.setLevel(Level.valueOf(rs.getInt("level")));
+        user.setLogin(rs.getInt("login"));
+        user.setRecommend(rs.getInt("recommend"));
         return user;
     };
 
@@ -25,23 +31,31 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public void add(User user) {
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(
-                "insert into users(id, name, password) values(?,?,?)");
-            ps.setString(1, user.getId());
-            ps.setString(2, user.getName());
-            ps.setString(3, user.getPassword());
-            return ps;
-        });
+        jdbcTemplate.update(
+                "insert into users(id, name, email, password, level, login, recommend) values(?,?,?,?,?,?,?)",
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getLevel().intValue(),
+                user.getLogin(),
+                user.getRecommend());
     }
 
     public User get(String id) {
         return this.jdbcTemplate.queryForObject("select * from users where id = ?",
-            new Object[] {id}, userMapper);
+                new Object[]{id}, userMapper);
     }
 
     public List<User> getAll() {
         return this.jdbcTemplate.query("select * from users order by id", userMapper);
+    }
+
+    public void update(User user) {
+        this.jdbcTemplate.update(
+                "update users set name = ?, email = ?, password = ?, level = ?, login = ?, "
+                        + "recommend = ? where id = ?", user.getName(), user.getEmail(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getId()
+        );
     }
 
     public void deleteAll() {
