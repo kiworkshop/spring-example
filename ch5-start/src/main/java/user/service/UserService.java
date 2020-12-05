@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Properties;
 
 @Setter
-public class UserService implements UserLevelUpgradePolicy {
+public class UserService {
     public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
     public static final int MIN_RECOMMEND_FOR_GOLD = 30;
     private UserDao userDao;
@@ -33,6 +33,13 @@ public class UserService implements UserLevelUpgradePolicy {
 
     public UserService(UserDao userDao) {
         this.userDao = userDao;
+    }
+
+    public void add(User user) {
+        if (user.getLevel() == null) {
+            user.setLevel(Level.BASIC);
+        }
+        userDao.add(user);
     }
 
     public void upgradeLevels() throws SQLException {
@@ -51,24 +58,7 @@ public class UserService implements UserLevelUpgradePolicy {
         }
     }
 
-    public void upgradeLevel(User user) {
-        user.upgradeLevel();
-        userDao.update(user);
-        sendUpgradeEmail(user);
-    }
-
-    private void sendUpgradeEmail(User user) {
-
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setFrom("useradmin@kiworkshop.com");
-        mailMessage.setSubject("Upgrade 안내");
-        mailMessage.setText("사용자님의 등급이 " + user.getLevel().name());
-
-        this.mailSender.send(mailMessage);
-    }
-
-    public boolean canUpgradeLevel(User user) {
+    private boolean canUpgradeLevel(User user) {
         Level currentLevel = user.getLevel();
         switch (currentLevel) {
             case BASIC:
@@ -82,12 +72,19 @@ public class UserService implements UserLevelUpgradePolicy {
         }
     }
 
-
-    public void add(User user) {
-        if (user.getLevel() == null) {
-            user.setLevel(Level.BASIC);
-        }
-        userDao.add(user);
+    void upgradeLevel(User user) {
+        user.upgradeLevel();
+        userDao.update(user);
+        sendUpgradeEmail(user);
     }
 
+    private void sendUpgradeEmail(User user) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(user.getEmail());
+        mailMessage.setFrom("useradmin@kiworkshop.com");
+        mailMessage.setSubject("Upgrade 안내");
+        mailMessage.setText("사용자님의 등급이 " + user.getLevel().name());
+
+        this.mailSender.send(mailMessage);
+    }
 }

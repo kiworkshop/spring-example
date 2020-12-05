@@ -2,20 +2,18 @@ package user.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.transaction.PlatformTransactionManager;
-import user.dao.DaoFactory;
+import user.config.UserConfig;
 import user.dao.UserDao;
 import user.dao.UserDaoJdbc;
 import user.domain.Level;
 import user.domain.User;
 
-import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,11 +35,11 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(UserConfig.class);
         userService = applicationContext.getBean("userService", UserService.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
         transactionManager = applicationContext.getBean("transactionManager", DataSourceTransactionManager.class);
-        mailSender = applicationContext.getBean("mailSender", DummyMailSender.class);
+        mailSender = new DummyMailSender();
         users = Arrays.asList(
                 new User("1deocks", "덕수", "ds@kiworshop.com", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
                 new User("2jj", "재주", "jj@kiworshop.com", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),

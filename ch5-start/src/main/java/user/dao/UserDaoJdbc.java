@@ -13,6 +13,7 @@ import user.domain.User;
 
 public class UserDaoJdbc implements UserDao {
     private final JdbcTemplate jdbcTemplate;
+
     private final RowMapper<User> userMapper = (rs, rowNum) -> {
         User user = new User();
         user.setId(rs.getString("id"));
@@ -50,15 +51,15 @@ public class UserDaoJdbc implements UserDao {
         return this.jdbcTemplate.query("select * from users order by id", userMapper);
     }
 
-    public void deleteAll() {
-        jdbcTemplate.update(connection -> connection.prepareStatement("delete from users"));
-    }
-
     public void update(User user) {
         this.jdbcTemplate.update(
                 "update users set name = ?, email = ?, password = ?, level = ?, login = ?, "
                         + "recommend = ? where id = ?", user.getName(), user.getEmail(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getId()
         );
+    }
+
+    public void deleteAll() {
+        jdbcTemplate.update(connection -> connection.prepareStatement("delete from users"));
     }
 
     public int getCount() {

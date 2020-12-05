@@ -10,6 +10,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
+import user.config.UserConfig;
 import user.domain.Level;
 import user.domain.User;
 
@@ -30,7 +31,7 @@ class UserDaoTest {
 
     @BeforeEach
     void setUp() {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(DaoFactory.class);
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(UserConfig.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
         dataSource = applicationContext.getBean("dataSource", DataSource.class);
         user1 = new User("deocks", "덕수", "ds@kiworkshop.com", "deocksword", Level.BASIC, 1, 0);
@@ -45,7 +46,7 @@ class UserDaoTest {
 
     @Test
     @DisplayName("새로운 User를 추가한다.")
-    void add() throws SQLException {
+    void add() {
 
         userDao.add(user1);
         userDao.add(user2);
@@ -62,7 +63,7 @@ class UserDaoTest {
 
     @Test
     @DisplayName("존재하지 않는 User id로 조회시 예외가 발생한다.")
-    void getUserFailure() throws SQLException {
+    void getUserFailure() {
         userDao.deleteAll();
         assertThat(userDao.getCount()).isEqualTo(0);
 
@@ -72,7 +73,7 @@ class UserDaoTest {
 
     @Test
     @DisplayName("총 User가 몇 명인지 조회한다.")
-    void count() throws SQLException {
+    void count() {
         userDao.deleteAll();
         assertThat(userDao.getCount()).isEqualTo(0);
         userDao.add(user1);

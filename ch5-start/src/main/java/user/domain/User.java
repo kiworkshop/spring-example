@@ -6,13 +6,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User {
-    String id;
-    String name;
-    String email;
-    String password;
-    Level level;
-    int login;
-    int recommend;
+    private String id;
+    private String name;
+    private String email;
+    private String password;
+    private Level level;
+    private int login;
+    private int recommend;
 
     public User() {
     }
@@ -27,12 +27,11 @@ public class User {
         this.recommend = recommend;
     }
 
-    public void upgradeLevel(){
+    public void upgradeLevel() {
         Level nextLevel = this.level.nextLevel();
-        if(nextLevel == null){
+        if (nextLevel == null) {
             throw new IllegalStateException(this.level + "은 업그레이드가 불가능합니다.");
-        }
-        else{
+        } else {
             this.level = nextLevel;
         }
     }
