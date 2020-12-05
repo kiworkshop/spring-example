@@ -5,7 +5,6 @@ import java.util.List;
 import user.domain.User;
 
 public interface UserDao {
-
     void add(User user);
 
     User get(String id);
@@ -16,6 +15,5 @@ public interface UserDao {
 
     int getCount();
 
-    void update(User user);
-
+    void update(User user1);
 }
