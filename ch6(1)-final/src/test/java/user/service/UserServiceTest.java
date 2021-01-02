@@ -3,11 +3,14 @@ package user.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import user.config.UserConfig;
 import user.dao.UserDao;
@@ -21,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 import static user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
@@ -31,23 +34,23 @@ class UserServiceTest {
 
     private UserDao userDao;
     private UserServiceImpl userServiceImpl;
-    private PlatformTransactionManager transactionManager;
     private MailSender mailSender;
     private List<User> users;
+    private ApplicationContext applicationContext;
 
     @BeforeEach
     void setUp() {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(UserConfig.class);
+        applicationContext = new AnnotationConfigApplicationContext(UserConfig.class);
         userServiceImpl = applicationContext.getBean("userServiceImpl", UserServiceImpl.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
-        transactionManager = applicationContext.getBean("transactionManager", DataSourceTransactionManager.class);
+        PlatformTransactionManager transactionManager = applicationContext.getBean("transactionManager", DataSourceTransactionManager.class);
         mailSender = new DummyMailSender();
         users = Arrays.asList(
-                new User("1deocks", "덕수", "ds@kiworshop.com", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
-                new User("2jj", "재주", "jj@kiworshop.com", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
-                new User("3ki", "광일", "ki@kiworshop.com", "jassword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD - 1),
-                new User("4harris", "성훈", "sh@kiworshop.com", "seongsword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
-                new User("5jeongkyo", "정교", "jk@kiworshop.com", "jeongsword", Level.GOLD, 100, Integer.MAX_VALUE)
+            new User("1deocks", "덕수", "ds@kiworshop.com", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
+            new User("2jj", "재주", "jj@kiworshop.com", "jassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0),
+            new User("3ki", "광일", "ki@kiworshop.com", "jassword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD - 1),
+            new User("4harris", "성훈", "sh@kiworshop.com", "seongsword", Level.SILVER, 60, MIN_RECOMMEND_FOR_GOLD),
+            new User("5jeongkyo", "정교", "jk@kiworshop.com", "jeongsword", Level.GOLD, 100, Integer.MAX_VALUE)
         );
     }
 
@@ -80,7 +83,7 @@ class UserServiceTest {
     }
 
     @Test
-    public void mockUpgradeLevels() throws Exception {
+    public void mockUpgradeLevels() {
         UserServiceImpl userServiceImpl = new UserServiceImpl();
 
         UserDao mockUserDao = mock(UserDao.class);
@@ -139,14 +142,16 @@ class UserServiceTest {
     }
 
     @Test
-    void upgradeAllOrNothing() throws SQLException {
+    @DirtiesContext
+    void upgradeAllOrNothing() throws Exception {
         UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setMailSender(mailSender);
 
-        UserServiceTx txUserService = new UserServiceTx();
-        txUserService.setTransactionManager(transactionManager);
-        txUserService.setUserService(testUserService);
+        ProxyFactoryBean transactionProxyFactoryBean = applicationContext.getBean("&userService", ProxyFactoryBean.class);
+        transactionProxyFactoryBean.setTarget(testUserService);
+
+        UserService userService = (UserService) transactionProxyFactoryBean.getObject();
 
         userDao.deleteAll();
         for (User user : users) {
@@ -154,7 +159,7 @@ class UserServiceTest {
         }
 
         try {
-            txUserService.upgradeLevels();
+            userService.upgradeLevels();
             fail("TestUserServiceException expected");
         } catch (TestUserServiceException e) {
             System.out.println(e);
@@ -179,9 +184,10 @@ class UserServiceTest {
     static class TestUserServiceException extends RuntimeException {
     }
 
-    static class MockMailSender implements MailSender{
+    static class MockMailSender implements MailSender {
         private List<String> requests = new ArrayList<String>();
-        public List<String> getRequests(){
+
+        public List<String> getRequests() {
             return requests;
         }
 

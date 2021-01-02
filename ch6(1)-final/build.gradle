@@ -33,6 +33,8 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-expression', version: '3.1.2.RELEASE'
     compile group: 'org.springframework', name: 'spring-jdbc', version: '3.1.2.RELEASE'
     compile group: 'org.springframework', name: 'org.springframework.transaction', version: '3.1.2.RELEASE'
+//    compile group: 'org.springsource', name: 'org.aopalliance', version: '1.0.0'
+//    compile group: 'org.springframework', name: 'aop', version: '3.0.7.RELEASE'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'

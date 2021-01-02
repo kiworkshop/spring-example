@@ -1,5 +1,11 @@
 package user.config;
 
+import org.aopalliance.aop.Advice;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.Pointcut;
+import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -7,9 +13,8 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import user.dao.UserDao;
 import user.dao.UserDaoJdbc;
-import user.service.UserService;
+import user.service.TransactionAdvice;
 import user.service.UserServiceImpl;
-import user.service.UserServiceTx;
 
 import javax.sql.DataSource;
 
@@ -17,11 +22,28 @@ import javax.sql.DataSource;
 public class UserConfig {
 
     @Bean
-    public UserServiceTx userService() {
-        UserServiceTx userService = new UserServiceTx();
-        userService.setTransactionManager(transactionManager());
-        userService.setUserService(userServiceImpl());
-        return userService;
+    public ProxyFactoryBean userService(UserServiceImpl userService, Advisor transactionAdvisor) {
+        ProxyFactoryBean proxyFactoryBean = new ProxyFactoryBean();
+        proxyFactoryBean.setTarget(userService);
+        proxyFactoryBean.addAdvisor(transactionAdvisor);
+        return proxyFactoryBean;
+    }
+
+    @Bean
+    public Advisor trasactionAdvisor(Pointcut transactionPointcut, Advice transactionAdvice) {
+        return new DefaultPointcutAdvisor(transactionPointcut, transactionAdvice);
+    }
+
+    @Bean
+    public TransactionAdvice transactionAdvice() {
+        return new TransactionAdvice(transactionManager());
+    }
+
+    @Bean
+    public NameMatchMethodPointcut transactionPointcut() {
+        NameMatchMethodPointcut nameMatchMethodPointcut = new NameMatchMethodPointcut();
+        nameMatchMethodPointcut.setMappedName("upgrade*");
+        return nameMatchMethodPointcut;
     }
 
     @Bean
