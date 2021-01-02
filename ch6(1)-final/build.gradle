@@ -42,4 +42,6 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.16'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    testImplementation 'org.mockito:mockito-core:3.3.3'
 }
