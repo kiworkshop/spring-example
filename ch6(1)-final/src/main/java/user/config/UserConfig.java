@@ -30,7 +30,7 @@ public class UserConfig {
     }
 
     @Bean
-    public Advisor trasactionAdvisor(Pointcut transactionPointcut, Advice transactionAdvice) {
+    public Advisor transactionAdvisor(Pointcut transactionPointcut, Advice transactionAdvice) {
         return new DefaultPointcutAdvisor(transactionPointcut, transactionAdvice);
     }
 
