@@ -10,4 +10,5 @@ include 'ch5-start'
 include 'ch5-final'
 include 'ch6(1)-start'
 include 'ch6(1)-final'
-
+include 'ch6(2)-start'
+include 'ch6(2)-final'

@@ -1,40 +1,27 @@
 package user.service;
 
 import lombok.Setter;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
-import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
-import org.springframework.transaction.interceptor.TransactionInterceptor;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.annotation.Transactional;
 import user.dao.UserDao;
 import user.domain.Level;
 import user.domain.User;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.lang.annotation.Target;
 import java.util.List;
-import java.util.Properties;
 
 @Setter
-public class UserService {
+public class UserServiceImpl implements UserService {
     public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
     public static final int MIN_RECOMMEND_FOR_GOLD = 30;
     private UserDao userDao;
-    private PlatformTransactionManager transactionManager;
     private MailSender mailSender;
 
-    public UserService() {
+    public UserServiceImpl() {
     }
 
-    public UserService(UserDao userDao) {
+    public UserServiceImpl(UserDao userDao) {
         this.userDao = userDao;
     }
 
@@ -45,20 +32,11 @@ public class UserService {
         userDao.add(user);
     }
 
-    public void upgradeLevels() throws SQLException {
-        RuleBasedTransactionAttribute
-        TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
-
-        try {
-            List<User> users = userDao.getAll();
-            for (User user : users) {
-                if (canUpgradeLevel(user))
-                    upgradeLevel(user);
-            }
-            this.transactionManager.commit(status);
-        } catch (Exception e) {
-            this.transactionManager.rollback(status);
-            throw e;
+    public void upgradeLevels() {
+        List<User> users = userDao.getAll();
+        for (User user : users) {
+            if (canUpgradeLevel(user))
+                upgradeLevel(user);
         }
     }
 
@@ -82,7 +60,28 @@ public class UserService {
         sendUpgradeEmail(user);
     }
 
-    private void sendUpgradeEmail(User user) {
+    @Override
+    public User get(String id) {
+        return userDao.get(id);
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userDao.getAll();
+    }
+
+    @Override
+    public void deleteAll() {
+        userDao.deleteAll();
+    }
+
+    @Override
+    public void update(User user) {
+        userDao.update(user);
+    }
+
+    @Transactional()
+    public void sendUpgradeEmail(User user) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(user.getEmail());
         mailMessage.setFrom("useradmin@kiworkshop.com");
@@ -91,4 +90,5 @@ public class UserService {
 
         this.mailSender.send(mailMessage);
     }
+    
 }
