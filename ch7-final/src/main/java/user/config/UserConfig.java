@@ -19,8 +19,7 @@ import user.dao.UserDaoJdbc;
 import user.service.NameMatchClassMethodPointcut;
 import user.service.TransactionAdvice;
 import user.service.UserServiceImpl;
-import user.sqlservice.SimpleSqlService;
-import user.sqlservice.SqlService;
+import user.sqlservice.*;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -74,18 +73,21 @@ public class UserConfig {
         return userDaoJdbc;
     }
 
-    private SimpleSqlService sqlService() {
-        Map<String, String> sqlMap = new HashMap<>();
-        sqlMap.put("userAdd", "insert into users(id, name, password, email, level, login, recommend) values(?,?,?,?,?,?,?)");
-        sqlMap.put("userGet", "select * from users where id = ?");
-        sqlMap.put("userGetAll", "select * from users order by id");
-        sqlMap.put("userDeleteAll", "delete from users");
-        sqlMap.put("userGetCount", "select count(*) from users");
-        sqlMap.put("userUpdate", "update users set name= ?, password = ?, email = ?, level = ?, login = ?, recommend = ?  where id = ?");
+    @Bean
+    public SqlService sqlService() {
+       return new DefaultSqlService();
+    }
 
-        SimpleSqlService simpleSqlService = new SimpleSqlService();
-        simpleSqlService.setSqlMap(sqlMap);
-        return simpleSqlService;
+    @Bean
+    public SqlReader sqlReader() {
+        JaxbXmlSqlReader jaxbXmlSqlReader = new JaxbXmlSqlReader();
+        jaxbXmlSqlReader.setSqlmapFile("/sqlmap.xml");
+        return jaxbXmlSqlReader;
+    }
+
+    @Bean
+    public SqlRegistry sqlRegistry() {
+        return new HashMapSqlRegistry();
     }
 
     @Bean
