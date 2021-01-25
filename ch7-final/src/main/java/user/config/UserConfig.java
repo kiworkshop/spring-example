@@ -19,8 +19,12 @@ import user.dao.UserDaoJdbc;
 import user.service.NameMatchClassMethodPointcut;
 import user.service.TransactionAdvice;
 import user.service.UserServiceImpl;
+import user.sqlservice.SimpleSqlService;
+import user.sqlservice.SqlService;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class UserConfig {
@@ -65,7 +69,23 @@ public class UserConfig {
 
     @Bean
     public UserDao userDao() {
-        return new UserDaoJdbc(dataSource());
+        UserDaoJdbc userDaoJdbc = new UserDaoJdbc(dataSource());
+        userDaoJdbc.setSqlService(sqlService());
+        return userDaoJdbc;
+    }
+
+    private SimpleSqlService sqlService() {
+        Map<String, String> sqlMap = new HashMap<>();
+        sqlMap.put("userAdd", "insert into users(id, name, password, email, level, login, recommend) values(?,?,?,?,?,?,?)");
+        sqlMap.put("userGet", "select * from users where id = ?");
+        sqlMap.put("userGetAll", "select * from users order by id");
+        sqlMap.put("userDeleteAll", "delete from users");
+        sqlMap.put("userGetCount", "select count(*) from users");
+        sqlMap.put("userUpdate", "update users set name= ?, password = ?, email = ?, level = ?, login = ?, recommend = ?  where id = ?");
+
+        SimpleSqlService simpleSqlService = new SimpleSqlService();
+        simpleSqlService.setSqlMap(sqlMap);
+        return simpleSqlService;
     }
 
     @Bean

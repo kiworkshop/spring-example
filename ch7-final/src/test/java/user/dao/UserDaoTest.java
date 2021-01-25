@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import javax.sql.DataSource;
 
 class UserDaoTest {
+
     private UserDao userDao;
     private DataSource dataSource;
     private User user1;
