@@ -64,22 +64,24 @@ public class UserConfig {
     }
 
     @Bean
-    public UserServiceImpl userService() {
+    public UserServiceImpl userService() throws IOException {
         UserServiceImpl userServiceImpl = new UserServiceImpl(userDao());
 //        userServiceImpl.setMailSender(mailSender());
         return userServiceImpl;
     }
 
     @Bean
-    public UserDao userDao() {
+    public UserDao userDao() throws IOException {
         UserDaoJdbc userDaoJdbc = new UserDaoJdbc(dataSource());
         userDaoJdbc.setSqlService(sqlService());
         return userDaoJdbc;
     }
 
     @Bean
-    public SqlService sqlService() {
-       return new DefaultSqlService();
+    public SqlService sqlService() throws IOException {
+        OxmSqlService oxmSqlService = new OxmSqlService();
+        oxmSqlService.setUnmarshaller(unmarshaller());
+        return oxmSqlService;
     }
 
     @Bean
@@ -95,11 +97,10 @@ public class UserConfig {
     }
 
     @Bean
-    public Unmarshaller unmarshaller() throws IOException {
-       CastorMarshaller castorMarshaller = new CastorMarshaller();
-       Resource resource = new ClassPathResource("/mapping.xml");
-       castorMarshaller.setMappingLocation(resource);
-       return castorMarshaller;
+    public Unmarshaller unmarshaller() {
+        Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+        jaxb2Marshaller.setContextPath("user.sqlservice.jaxb");
+        return jaxb2Marshaller;
     }
 
     @Bean
