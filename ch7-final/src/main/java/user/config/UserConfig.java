@@ -13,6 +13,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -26,6 +29,7 @@ import user.service.TransactionAdvice;
 import user.service.UserServiceImpl;
 import user.sqlservice.*;
 import user.sqlservice.updatable.ConcurrentHashMapSqlRegistry;
+import user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -96,7 +100,9 @@ public class UserConfig {
 
     @Bean
     public SqlRegistry sqlRegistry() {
-        return new ConcurrentHashMapSqlRegistry();
+        EmbeddedDbSqlRegistry embeddedDbSqlRegistry = new EmbeddedDbSqlRegistry();
+        embeddedDbSqlRegistry.setDataSource(embeddedDatabase());
+        return embeddedDbSqlRegistry;
     }
 
     @Bean
@@ -104,6 +110,14 @@ public class UserConfig {
         Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
         jaxb2Marshaller.setContextPath("user.sqlservice.jaxb");
         return jaxb2Marshaller;
+    }
+
+    @Bean
+    public EmbeddedDatabase embeddedDatabase() {
+        return new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.HSQL)
+                .addScript("sqlRegistrySchema.sql")
+                .build();
     }
 
     @Bean
