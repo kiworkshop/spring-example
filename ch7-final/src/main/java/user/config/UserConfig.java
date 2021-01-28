@@ -25,6 +25,7 @@ import user.service.NameMatchClassMethodPointcut;
 import user.service.TransactionAdvice;
 import user.service.UserServiceImpl;
 import user.sqlservice.*;
+import user.sqlservice.updatable.ConcurrentHashMapSqlRegistry;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class UserConfig {
     public SqlService sqlService() throws IOException {
         OxmSqlService oxmSqlService = new OxmSqlService();
         oxmSqlService.setUnmarshaller(unmarshaller());
-        //oxmSqlService.setSqlmap(new FileSystemResource("C:\\Users\\taesikyoo\\project\\kiworkshop\\spring-example\\ch7-final\\src\\main\\resources\\sqlmap.xml"));
+        oxmSqlService.setSqlRegistry(sqlRegistry());
         return oxmSqlService;
     }
 
@@ -95,7 +96,7 @@ public class UserConfig {
 
     @Bean
     public SqlRegistry sqlRegistry() {
-        return new HashMapSqlRegistry();
+        return new ConcurrentHashMapSqlRegistry();
     }
 
     @Bean
