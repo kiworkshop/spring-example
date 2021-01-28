@@ -9,6 +9,7 @@ import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
@@ -81,6 +82,7 @@ public class UserConfig {
     public SqlService sqlService() throws IOException {
         OxmSqlService oxmSqlService = new OxmSqlService();
         oxmSqlService.setUnmarshaller(unmarshaller());
+        //oxmSqlService.setSqlmap(new FileSystemResource("C:\\Users\\taesikyoo\\project\\kiworkshop\\spring-example\\ch7-final\\src\\main\\resources\\sqlmap.xml"));
         return oxmSqlService;
     }
 
