@@ -3,27 +3,31 @@ package user.config;
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.oxm.Unmarshaller;
+import org.springframework.oxm.castor.CastorMarshaller;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.xml.sax.InputSource;
 import user.dao.UserDao;
 import user.dao.UserDaoJdbc;
+import user.domain.User;
 import user.service.NameMatchClassMethodPointcut;
 import user.service.TransactionAdvice;
 import user.service.UserServiceImpl;
 import user.sqlservice.*;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Configuration
 public class UserConfig {
@@ -88,6 +92,14 @@ public class UserConfig {
     @Bean
     public SqlRegistry sqlRegistry() {
         return new HashMapSqlRegistry();
+    }
+
+    @Bean
+    public Unmarshaller unmarshaller() throws IOException {
+       CastorMarshaller castorMarshaller = new CastorMarshaller();
+       Resource resource = new ClassPathResource("/mapping.xml");
+       castorMarshaller.setMappingLocation(resource);
+       return castorMarshaller;
     }
 
     @Bean
