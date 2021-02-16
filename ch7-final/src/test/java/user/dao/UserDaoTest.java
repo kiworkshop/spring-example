@@ -1,5 +1,6 @@
 package user.dao;
 
+import config.TestApplicationContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,6 +11,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
+import org.springframework.test.context.ContextConfiguration;
 import user.config.UserConfig;
 import user.domain.Level;
 import user.domain.User;
@@ -22,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import javax.sql.DataSource;
 
+@ContextConfiguration(classes = TestApplicationContext.class)
 class UserDaoTest {
 
     private UserDao userDao;
@@ -32,7 +35,7 @@ class UserDaoTest {
 
     @BeforeEach
     void setUp() {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(UserConfig.class);
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestApplicationContext.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
         dataSource = applicationContext.getBean("dataSource", DataSource.class);
         user1 = new User("deocks", "덕수", "ds@kiworkshop.com", "deocksword", Level.BASIC, 1, 0);
