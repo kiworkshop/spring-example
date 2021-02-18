@@ -6,13 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.mail.MailSender;
-import org.springframework.oxm.Unmarshaller;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -20,14 +17,11 @@ import user.dao.UserDao;
 import user.service.DummyMailSender;
 import user.service.TestUserService;
 import user.service.UserService;
-import user.sqlservice.OxmSqlService;
-import user.sqlservice.SqlRegistry;
-import user.sqlservice.SqlService;
-import user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 
 @Configuration
 @EnableTransactionManagement
 @ComponentScan(basePackages = "user")
+@Import(SqlServiceContext.class)
 public class AppContext {
 
     /**
@@ -68,40 +62,5 @@ public class AppContext {
     @Bean
     public MailSender mailSender() {
         return new DummyMailSender();
-    }
-
-    /**
-     * SQL 서비스
-     */
-
-    @Bean
-    public SqlService sqlService() {
-        OxmSqlService sqlService = new OxmSqlService();
-        sqlService.setUnmarshaller(unmarshaller());
-        sqlService.setSqlRegistry(sqlRegistry());
-        return sqlService;
-    }
-
-    @Bean
-    public SqlRegistry sqlRegistry() {
-        EmbeddedDbSqlRegistry sqlRegistry = new EmbeddedDbSqlRegistry();
-        sqlRegistry.setDataSource(embeddedDatabase());
-        return sqlRegistry;
-    }
-
-    @Bean
-    public Unmarshaller unmarshaller() {
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setContextPath("user.sqlservice.jaxb");
-        return marshaller;
-    }
-
-    @Bean
-    public DataSource embeddedDatabase() {
-        return new EmbeddedDatabaseBuilder()
-                .setName("embeddedDatabase")
-                .setType(EmbeddedDatabaseType.HSQL)
-                .addScript("sqlRegistrySchema.sql")
-                .build();
     }
 }
