@@ -12,21 +12,23 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import config.AppContext;
-import user.TestAppContext;
 import user.domain.Level;
 import user.domain.User;
 
 // Junit5는 spring 5.x버전 이상의 SpringExtension을 사용하므로 이후 코드와 호환성을 생각하여 우선 Junit4로 테스트를 변경함
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {TestAppContext.class, AppContext.class})
+@ContextConfiguration(classes = {AppContext.class})
+@ActiveProfiles("production")
 public class UserDaoTest {
 
     @Autowired
@@ -165,5 +167,17 @@ public class UserDaoTest {
         assertThat(user1.getLevel()).isEqualTo(user2.getLevel());
         assertThat(user1.getLogin()).isEqualTo(user2.getLogin());
         assertThat(user1.getRecommend()).isEqualTo(user2.getRecommend());
+    }
+
+    /* 등록된 빈 내역을 조회하는 테스트 메서드 */
+    @Autowired
+    DefaultListableBeanFactory bf;
+
+    @Test
+    public void beans() {
+        // test profile에서는 DummyMailSender만, production profile에서는 JavaMailSenderImpl이 출력되어야함
+        for (String n : bf.getBeanDefinitionNames()) {
+            System.out.println(n + "\t" + bf.getBean(n).getClass().getName());
+        }
     }
 }

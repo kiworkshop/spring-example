@@ -9,19 +9,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.mail.MailSender;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import user.dao.UserDao;
-import user.service.DummyMailSender;
-import user.service.TestUserService;
-import user.service.UserService;
 
 @Configuration
 @EnableTransactionManagement
 @ComponentScan(basePackages = "user")
-@Import(SqlServiceContext.class)
+@Import({SqlServiceContext.class, TestAppContext.class, ProductionAppContext.class})
 public class AppContext {
 
     /**
@@ -51,16 +47,4 @@ public class AppContext {
     @Autowired
     UserDao userDao;
 
-    @Bean
-    public UserService testUserService() {
-        TestUserService testService = new TestUserService();
-        testService.setUserDao(this.userDao);
-        testService.setMailSender(mailSender());
-        return testService;
-    }
-
-    @Bean
-    public MailSender mailSender() {
-        return new DummyMailSender();
-    }
 }
