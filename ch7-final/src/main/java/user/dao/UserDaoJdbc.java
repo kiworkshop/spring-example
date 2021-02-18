@@ -1,17 +1,22 @@
 package user.dao;
 
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+
 import user.domain.Level;
 import user.domain.User;
 import user.sqlservice.SqlService;
 
-import javax.sql.DataSource;
-import java.util.List;
-
+@Repository("userDao")
 public class UserDaoJdbc implements UserDao {
 
-    private final JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
     private final RowMapper<User> userMapper = (rs, rowNum) -> {
         User user = new User();
         user.setId(rs.getString("id"));
@@ -23,9 +28,13 @@ public class UserDaoJdbc implements UserDao {
         user.setRecommend(rs.getInt("recommend"));
         return user;
     };
+    @Autowired
     private SqlService sqlService;
 
-    public UserDaoJdbc(DataSource dataSource) {
+    public UserDaoJdbc() {}
+
+    @Autowired
+    public void setJdbcTemplate(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

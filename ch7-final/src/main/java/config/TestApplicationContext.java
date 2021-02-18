@@ -1,7 +1,10 @@
 package config;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
@@ -12,21 +15,19 @@ import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
 import user.dao.UserDao;
-import user.dao.UserDaoJdbc;
 import user.service.DummyMailSender;
 import user.service.TestUserService;
 import user.service.UserService;
-import user.service.UserServiceImpl;
 import user.sqlservice.OxmSqlService;
 import user.sqlservice.SqlRegistry;
 import user.sqlservice.SqlService;
 import user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 
-import javax.sql.DataSource;
-
 @Configuration
 @EnableTransactionManagement
+@ComponentScan(basePackages = "user")
 public class TestApplicationContext {
 
     /**
@@ -54,27 +55,12 @@ public class TestApplicationContext {
      * 애플리케이션 로직 & 테스트
      */
     @Autowired
-    SqlService sqlService;
-
-    @Bean
-    public UserDao userDao() {
-        UserDaoJdbc dao = new UserDaoJdbc(dataSource());
-        dao.setSqlService(this.sqlService);
-        return dao;
-    }
-
-    @Bean
-    public UserService userService() {
-        UserServiceImpl service = new UserServiceImpl();
-        service.setUserDao(userDao());
-        service.setMailSender(mailSender());
-        return service;
-    }
+    UserDao userDao;
 
     @Bean
     public UserService testUserService() {
         TestUserService testService = new TestUserService();
-        testService.setUserDao(userDao());
+        testService.setUserDao(this.userDao);
         testService.setMailSender(mailSender());
         return testService;
     }

@@ -1,5 +1,9 @@
 package user.config;
 
+import java.io.IOException;
+
+import javax.sql.DataSource;
+
 import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
@@ -8,32 +12,26 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.oxm.Unmarshaller;
-import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.xml.sax.InputSource;
+
 import user.dao.UserDao;
 import user.dao.UserDaoJdbc;
-import user.domain.User;
 import user.service.NameMatchClassMethodPointcut;
 import user.service.TransactionAdvice;
 import user.service.UserServiceImpl;
-import user.sqlservice.*;
-import user.sqlservice.updatable.ConcurrentHashMapSqlRegistry;
+import user.sqlservice.JaxbXmlSqlReader;
+import user.sqlservice.OxmSqlService;
+import user.sqlservice.SqlReader;
+import user.sqlservice.SqlRegistry;
+import user.sqlservice.SqlService;
 import user.sqlservice.updatable.EmbeddedDbSqlRegistry;
-
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.InputStream;
 
 @Configuration
 public class UserConfig {
@@ -78,8 +76,9 @@ public class UserConfig {
 
     @Bean
     public UserDao userDao() throws IOException {
-        UserDaoJdbc userDaoJdbc = new UserDaoJdbc(dataSource());
+        UserDaoJdbc userDaoJdbc = new UserDaoJdbc();
         userDaoJdbc.setSqlService(sqlService());
+        userDaoJdbc.setJdbcTemplate(dataSource());
         return userDaoJdbc;
     }
 

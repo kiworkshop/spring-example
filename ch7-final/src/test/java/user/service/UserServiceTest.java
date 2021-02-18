@@ -1,13 +1,20 @@
 package user.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
+import static user.service.UserServiceImpl.*;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
@@ -16,22 +23,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import user.config.UserConfig;
+
+import config.TestApplicationContext;
 import user.dao.UserDao;
 import user.dao.UserDaoJdbc;
 import user.domain.Level;
 import user.domain.User;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
-import static user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
-import static user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 
 
 class UserServiceTest {
@@ -45,7 +42,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        applicationContext = new AnnotationConfigApplicationContext(UserConfig.class);
+        applicationContext = new AnnotationConfigApplicationContext(TestApplicationContext.class);
         userService = applicationContext.getBean("userService", UserService.class);
         mailSender = mock(MailSender.class);
         userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
