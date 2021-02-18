@@ -28,7 +28,7 @@ import user.domain.User;
 // Junit5는 spring 5.x버전 이상의 SpringExtension을 사용하므로 이후 코드와 호환성을 생각하여 우선 Junit4로 테스트를 변경함
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {AppContext.class})
-@ActiveProfiles("production")
+@ActiveProfiles("test")
 public class UserDaoTest {
 
     @Autowired

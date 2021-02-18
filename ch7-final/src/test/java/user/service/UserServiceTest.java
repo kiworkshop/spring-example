@@ -34,7 +34,7 @@ import user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {AppContext.class})
-@ActiveProfiles("production")
+@ActiveProfiles("test")
 public class UserServiceTest {
 
     @Autowired
