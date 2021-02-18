@@ -1,56 +1,57 @@
 package user.dao;
 
-import config.TestApplicationContext;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
-
-import org.springframework.test.context.ContextConfiguration;
-import user.config.UserConfig;
-import user.domain.Level;
-import user.domain.User;
+import static org.assertj.core.api.Assertions.*;
 
 import java.sql.SQLException;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import javax.sql.DataSource;
 
-@ContextConfiguration(classes = TestApplicationContext.class)
-class UserDaoTest {
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import config.AppContext;
+import user.TestAppContext;
+import user.domain.Level;
+import user.domain.User;
+
+// Junit5는 spring 5.x버전 이상의 SpringExtension을 사용하므로 이후 코드와 호환성을 생각하여 우선 Junit4로 테스트를 변경함
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {TestAppContext.class, AppContext.class})
+public class UserDaoTest {
+
+    @Autowired
     private UserDao userDao;
+
+    @Autowired
     private DataSource dataSource;
     private User user1;
     private User user2;
     private User user3;
 
-    @BeforeEach
-    void setUp() {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestApplicationContext.class);
-        userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
-        dataSource = applicationContext.getBean("dataSource", DataSource.class);
+    @Before
+    public void setUp() {
         user1 = new User("deocks", "덕수", "ds@kiworkshop.com", "deocksword", Level.BASIC, 1, 0);
         user2 = new User("jj", "재주", "jj@kiworkshop.com", "jassword", Level.SILVER, 55, 10);
         user3 = new User("ki", "광일", "ki@kiworkshop.com", "jassword", Level.GOLD, 100, 40);
     }
 
-    @AfterEach
-    void tearDown() {
+    @After
+    public void tearDown() {
         userDao.deleteAll();
     }
 
     @Test
-    @DisplayName("새로운 User를 추가한다.")
-    void add() {
+    public void 새로운_User를_추가한다() {
 
         userDao.add(user1);
         userDao.add(user2);
@@ -66,8 +67,7 @@ class UserDaoTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 User id로 조회시 예외가 발생한다.")
-    void getUserFailure() {
+    public void 존재하지않는_Userid로_조회시_예외발생() {
         userDao.deleteAll();
         assertThat(userDao.getCount()).isEqualTo(0);
 
@@ -76,8 +76,7 @@ class UserDaoTest {
     }
 
     @Test
-    @DisplayName("총 User가 몇 명인지 조회한다.")
-    void count() {
+    public void count() {
         userDao.deleteAll();
         assertThat(userDao.getCount()).isEqualTo(0);
         userDao.add(user1);
@@ -138,8 +137,7 @@ class UserDaoTest {
     }
 
     @Test
-    @DisplayName("같은 id의 사용자를 등록하면 예외 발생")
-    void duplicateKey() {
+    public void 같은_id의_사용자를_등록하면_예외발생() {
         userDao.add(user1);
 
         assertThatThrownBy(() -> userDao.add(user1))
@@ -147,8 +145,7 @@ class UserDaoTest {
     }
 
     @Test
-    @DisplayName("SQLException 전환 기능의 학습 테스트")
-    void sqlExceptionTranslate() {
+    public void sqlExceptionTranslate_학습테스트() {
         try {
             userDao.add(user1);
             userDao.add(user1);

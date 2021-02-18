@@ -10,43 +10,44 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import config.TestApplicationContext;
+import config.AppContext;
+import user.TestAppContext;
 import user.dao.UserDao;
-import user.dao.UserDaoJdbc;
 import user.domain.Level;
 import user.domain.User;
 
 
-class UserServiceTest {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {TestAppContext.class, AppContext.class})
+public class UserServiceTest {
 
+    @Autowired
     private UserDao userDao;
+    @Autowired
     private UserService userService;
     private MailSender mailSender;
     private List<User> users;
-    private ApplicationContext applicationContext;
+    @Autowired
     private PlatformTransactionManager transactionManager;
 
-    @BeforeEach
-    void setUp() {
-        applicationContext = new AnnotationConfigApplicationContext(TestApplicationContext.class);
-        userService = applicationContext.getBean("userService", UserService.class);
+    @Before
+    public void setUp() {
         mailSender = mock(MailSender.class);
-        userDao = applicationContext.getBean("userDao", UserDaoJdbc.class);
-        transactionManager = applicationContext.getBean("transactionManager", DataSourceTransactionManager.class);
         mailSender = new DummyMailSender();
         users = Arrays.asList(
             new User("1deocks", "덕수", "ds@kiworshop.com", "deocksword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
@@ -80,7 +81,7 @@ class UserServiceTest {
     }
 
     @Test
-    void upgradeLevels() throws SQLException {
+    public void upgradeLevels() throws SQLException {
         UserServiceImpl userServiceImpl = new UserServiceImpl();
 
         MockUserDao mockUserDao = new MockUserDao(this.users);
@@ -135,7 +136,7 @@ class UserServiceTest {
     }
 
     @Test
-    void add() {
+    public void add() {
         userDao.deleteAll();
 
         User userWithLevel = users.get(4);
@@ -163,7 +164,7 @@ class UserServiceTest {
 
     @Test
     @DirtiesContext
-    void upgradeAllOrNothing() throws Exception {
+    public void upgradeAllOrNothing() throws Exception {
         UserServiceImpl testUserService = new TestUserServiceImpl(users.get(1).getId());
         testUserService.setUserDao(this.userDao);
         testUserService.setMailSender(mailSender);

@@ -28,7 +28,7 @@ import user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 @Configuration
 @EnableTransactionManagement
 @ComponentScan(basePackages = "user")
-public class TestApplicationContext {
+public class AppContext {
 
     /**
      * DB 연결과 트랜잭션
