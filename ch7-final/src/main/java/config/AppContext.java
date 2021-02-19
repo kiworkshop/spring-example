@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mail.MailSender;
@@ -30,7 +32,7 @@ import user.service.UserService;
 @ComponentScan(basePackages = "user")
 @Import({SqlServiceContext.class})
 @PropertySource(value = "/database.properties")
-public class AppContext {
+public class AppContext implements SqlMapConfig {
 
     /**
      * DB 연결과 트랜잭션
@@ -53,6 +55,11 @@ public class AppContext {
         dataSource.setUsername(this.username);
         dataSource.setPassword(this.password);
         return dataSource;
+    }
+
+    @Override
+    public Resource getSqlMapResource() {
+        return new ClassPathResource("/sqlmap.xml", UserDao.class);
     }
 
     @Bean

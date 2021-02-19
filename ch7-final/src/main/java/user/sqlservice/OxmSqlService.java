@@ -1,17 +1,17 @@
 package user.sqlservice;
 
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.oxm.Unmarshaller;
-import user.dao.UserDao;
-import user.sqlservice.exception.SqlRetrievalFailureException;
-import user.sqlservice.jaxb.SqlType;
-import user.sqlservice.jaxb.Sqlmap;
+import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
+
+import org.springframework.core.io.Resource;
+import org.springframework.oxm.Unmarshaller;
+
+import user.sqlservice.exception.SqlRetrievalFailureException;
+import user.sqlservice.jaxb.SqlType;
+import user.sqlservice.jaxb.Sqlmap;
 
 public class OxmSqlService implements SqlService {
 
@@ -48,7 +48,7 @@ public class OxmSqlService implements SqlService {
     private class OxmSqlReader implements SqlReader {
 
         private Unmarshaller unmarshaller;
-        private Resource sqlmap = new ClassPathResource("/sqlmap.xml");
+        private Resource sqlmap;
 
         public void setUnmarshaller(Unmarshaller unmarshaller) {
             this.unmarshaller = unmarshaller;

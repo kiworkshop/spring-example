@@ -2,6 +2,7 @@ package config;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
@@ -19,9 +20,12 @@ import user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 
 @Configuration
 public class SqlServiceContext {
+    @Autowired SqlMapConfig sqlMapConfig;
+
     @Bean
     public SqlService sqlService() throws IOException {
         OxmSqlService oxmSqlService = new OxmSqlService();
+        oxmSqlService.setSqlmap(this.sqlMapConfig.getSqlMapResource());
         oxmSqlService.setUnmarshaller(unmarshaller());
         oxmSqlService.setSqlRegistry(sqlRegistry());
         return oxmSqlService;
